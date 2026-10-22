@@ -55,8 +55,7 @@ jobs:
                 with:
                     php-version: ${{ matrix.php }}
                     tools: composer, pecl
-                    # ext/mysql only exists on PHP 5.x, which is the only place the 'mysql' DB jobs run
-                    extensions: sqlite3, pgsql, mysqli, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, mbstring${{ matrix.DB == 'mysql' && ', mysql' || '' }}
+                    extensions: sqlite3, pgsql, mysqli, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, mbstring
                     ini-values: ${{ env.PHP_INI_VALUES }}
                     coverage: xdebug
 
