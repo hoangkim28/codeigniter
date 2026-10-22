@@ -212,6 +212,10 @@ class Encryption_test extends CI_TestCase {
 
 		$this->assertEquals($message, $this->encryption->decrypt($this->encryption->encrypt($message)));
 
+		// NULL round-trips as NULL
+		$this->assertNull($this->encryption->encrypt(NULL));
+		$this->assertNull($this->encryption->decrypt(NULL));
+
 		// Try DES3 in OFB mode, just for the sake of changing stuff
 		$this->encryption->initialize(array('cipher' => 'tripledes', 'mode' => 'ofb', 'key' => substr($key, 0, 8)));
 		$this->assertEquals($message, $this->encryption->decrypt($this->encryption->encrypt($message)));
