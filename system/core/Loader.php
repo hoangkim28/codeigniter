@@ -499,20 +499,7 @@ class CI_Loader {
 	 */
 	public function view($view, $vars = array(), $return = FALSE)
 	{
-		$measure = "View - $view";
-		$CI =& get_instance();
-
-		if (property_exists($CI, "debugbar") && $CI->debugbar) {
-			$CI->debugbar["time"]->startMeasure($measure);
-		}
-
-		$result = $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_prepare_view_vars($vars), '_ci_return' => $return));
-
-		if (property_exists($CI, "debugbar") && $CI->debugbar && $CI->debugbar["time"]->hasStartedMeasure($measure)) {
-			$CI->debugbar["time"]->stopMeasure($measure);
-		}
-
-		return $result;
+		return $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_prepare_view_vars($vars), '_ci_return' => $return));
 	}
 
 	// --------------------------------------------------------------------
