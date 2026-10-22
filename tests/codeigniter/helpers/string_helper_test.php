@@ -100,6 +100,18 @@ class String_helper_test extends CI_TestCase {
 		$this->assertEquals(16, strlen(random_string('alnum', 16)));
 		$this->assertEquals(32, strlen(random_string('md5', 16)));
 		$this->assertEquals('string', gettype(random_string('numeric', 16)));
+
+		// Same output format as before for every type
+		$assertRegExp = method_exists($this, 'assertMatchesRegularExpression')
+			? 'assertMatchesRegularExpression'
+			: 'assertRegExp';
+		$this->$assertRegExp('/^[0-9a-zA-Z]{100}$/', random_string('alnum', 100));
+		$this->$assertRegExp('/^[a-zA-Z]{100}$/', random_string('alpha', 100));
+		$this->$assertRegExp('/^[0-9]{100}$/', random_string('numeric', 100));
+		$this->$assertRegExp('/^[1-9]{100}$/', random_string('nozero', 100));
+		$this->$assertRegExp('/^[0-9a-f]{32}$/', random_string('unique'));
+		$this->$assertRegExp('/^[0-9a-f]{40}$/', random_string('encrypt'));
+		$this->assertNotEquals(random_string('md5'), random_string('md5'));
 	}
 
 	// --------------------------------------------------------------------
