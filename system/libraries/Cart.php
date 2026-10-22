@@ -204,8 +204,8 @@ class CI_Cart {
 		// Prep the quantity. It can only be a number.  Duh... also trim any leading zeros
 		$items['qty'] = (float) $items['qty'];
 
-		// If the quantity is zero or blank there's nothing for us to do
-		if ($items['qty'] == 0)
+		// If the quantity is zero, negative or blank there's nothing for us to do
+		if ($items['qty'] <= 0)
 		{
 			return FALSE;
 		}
@@ -262,7 +262,7 @@ class CI_Cart {
 
 		// Now that we have our unique "row ID", we'll add our cart items to the master array
 		// grab quantity if it's already there and add it on
-		$old_quantity = isset($this->_cart_contents[$rowid]['qty']) ? (int) $this->_cart_contents[$rowid]['qty'] : 0;
+		$old_quantity = isset($this->_cart_contents[$rowid]['qty']) ? (float) $this->_cart_contents[$rowid]['qty'] : 0;
 
 		// Re-create the entry, just to make sure our index contains only the data from this submission
 		$items['rowid'] = $rowid;
@@ -354,9 +354,9 @@ class CI_Cart {
 		if (isset($items['qty']))
 		{
 			$items['qty'] = (float) $items['qty'];
-			// Is the quantity zero?  If so we will remove the item from the cart.
+			// Is the quantity zero or negative?  If so we will remove the item from the cart.
 			// If the quantity is greater than zero we are updating
-			if ($items['qty'] == 0)
+			if ($items['qty'] <= 0)
 			{
 				unset($this->_cart_contents[$items['rowid']]);
 				return TRUE;
