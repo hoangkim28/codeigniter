@@ -4,21 +4,21 @@ What is this repository?
 
 |tests| |php| |version| |downloads|
 
-.. |tests| image:: https://github.com/pocketarc/codeigniter/actions/workflows/test-phpunit.yml/badge.svg?branch=develop
-   :target: https://github.com/pocketarc/codeigniter/actions/workflows/test-phpunit.yml
+.. |tests| image:: https://github.com/hoangkim28/codeigniter/actions/workflows/test-phpunit.yml/badge.svg?branch=develop
+   :target: https://github.com/hoangkim28/codeigniter/actions/workflows/test-phpunit.yml
    :alt: PHPUnit Tests
 
 .. |php| image:: https://img.shields.io/badge/PHP-5.4%20--%208.6-8892BF?logo=php
    :alt: PHP 5.4 - 8.6
 
-.. |version| image:: https://img.shields.io/packagist/v/pocketarc/codeigniter
-   :target: https://packagist.org/packages/pocketarc/codeigniter
+.. |version| image:: https://img.shields.io/packagist/v/hoangkim28/codeigniter
+   :target: https://packagist.org/packages/hoangkim28/codeigniter
    :alt: Packagist Version
 
-.. |downloads| image:: https://img.shields.io/packagist/dt/pocketarc/codeigniter
+.. |downloads| image:: https://img.shields.io/packagist/dt/hoangkim28/codeigniter
    :alt: Packagist Downloads
 
-This is a fork of CodeIgniter 3, with the goal of keeping it up to date with modern PHP versions. There is no intention to add new features or change the way CI3 works. This is purely a maintenance fork.
+This is a fork of `pocketarc/codeigniter <https://github.com/pocketarc/codeigniter>`_, itself a fork of CodeIgniter 3, with the goal of keeping it up to date with modern PHP versions. There is no intention to add new features or change the way CI3 works. This is purely a maintenance fork.
 
 **PHP Compatibility:**
 
@@ -74,13 +74,17 @@ You can install this fork using Composer:
 
 .. code-block:: bash
 
-	composer require pocketarc/codeigniter
+	composer require hoangkim28/codeigniter:^0.1
 
 After installation, you need to point CodeIgniter to the new system directory. In your `index.php` file, update the `$system_path` variable:
 
 .. code-block:: php
 
-	$system_path = 'vendor/pocketarc/codeigniter/system';
+	$system_path = 'vendor/hoangkim28/codeigniter/system';
+
+**Versioning**
+
+Releases of this fork are tagged ``v0.x.y`` (first release: ``v0.1.0``). The framework's ``CI_VERSION`` constant keeps the upstream CodeIgniter version, so code that checks it is unaffected.
 
 **Alternative Installation (Manual)**
 

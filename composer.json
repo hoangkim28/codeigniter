@@ -1,11 +1,12 @@
 {
-	"description": "Actively maintained CodeIgniter 3 fork with support for PHP 5.4 - PHP 8.6 (and beyond). Fully backward compatible.",
+	"description": "CodeIgniter 3 fork of pocketarc/codeigniter maintained by hoangkim28, with support for PHP 5.4 - PHP 8.6 (and beyond). Fully backward compatible.",
 	"name": "hoangkim28/codeigniter",
 	"type": "project",
-	"homepage": "https://github.com/pocketarc/codeigniter",
+	"homepage": "https://github.com/hoangkim28/codeigniter",
 	"license": "MIT",
 	"support": {
-		"source": "https://github.com/pocketarc/codeigniter"
+		"issues": "https://github.com/hoangkim28/codeigniter/issues",
+		"source": "https://github.com/hoangkim28/codeigniter"
 	},
 	"require": {
 		"php": ">=5.4.8"
