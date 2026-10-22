@@ -59,6 +59,15 @@ jobs:
                     ini-values: ${{ env.PHP_INI_VALUES }}
                     coverage: xdebug
 
+            # Temporary: tests (5.6, mysql) fails with "undefined function mysql_connect()"; check whether ext/mysql loads
+            -   name: Diagnose ext/mysql
+                if: startsWith(matrix.php, '5.')
+                run: |
+                    php -m | grep -i mysql || true
+                    php --ri mysql || true
+                    php --ini || true
+                    ls -la "$(php -r 'echo ini_get("extension_dir");')" | grep -i mysql || true
+
             -   name: Get composer cache directory
                 id: composer-cache
                 run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
