@@ -226,13 +226,23 @@ if ( ! function_exists('random_string'))
 						$pool = '123456789';
 						break;
 				}
-				return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
+				// random_int()/random_bytes() exist on PHP 7+ or with paragonie/random_compat
+				if ( ! function_exists('random_int'))
+				{
+					return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
+				}
+
+				for ($str = '', $max = strlen($pool) - 1, $i = 0; $i < $len; $i++)
+				{
+					$str .= $pool[random_int(0, $max)];
+				}
+				return $str;
 			case 'unique':
 			case 'md5':
-				return md5(uniqid(mt_rand()));
+				return function_exists('random_bytes') ? bin2hex(random_bytes(16)) : md5(uniqid(mt_rand()));
 			case 'encrypt':
 			case 'sha1':
-				return sha1(uniqid(mt_rand(), TRUE));
+				return function_exists('random_bytes') ? bin2hex(random_bytes(20)) : sha1(uniqid(mt_rand(), TRUE));
 		}
 	}
 }

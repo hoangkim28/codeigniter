@@ -64,6 +64,13 @@ class CI_Log {
 	protected $_log_filename;
 
 	/**
+	 * Whether the log filename is the default dated one
+	 *
+	 * @var bool
+	 */
+	protected $_log_filename_dated = TRUE;
+
+	/**
 	 * File permissions
 	 *
 	 * @var	int
@@ -131,6 +138,7 @@ class CI_Log {
 		if (isset($config['log_filename']) && $config['log_filename'] !== '')
 		{
 			$this->_log_filename = $config['log_filename'];
+			$this->_log_filename_dated = FALSE;
 		}
 		elseif (isset($config['log_file_extension']) && $config['log_file_extension'] !== '')
 		{
@@ -194,6 +202,12 @@ class CI_Log {
 			&& ! isset($this->_threshold_array[$this->_levels[$level]]))
 		{
 			return FALSE;
+		}
+
+		// Default names carry the date; refresh it so long-running processes roll over at midnight
+		if ($this->_log_filename_dated)
+		{
+			$this->_log_filename = 'log-'.date('Y-m-d').substr($this->_log_filename, 14);
 		}
 
 		$filepath = $this->_log_path.$this->_log_filename;

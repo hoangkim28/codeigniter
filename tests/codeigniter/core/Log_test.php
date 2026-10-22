@@ -76,6 +76,35 @@ class Log_test extends CI_TestCase {
 		$this->assertEquals($filename->getValue($instance), 'custom.log');
 	}
 
+	public function test_write_log_uses_current_date()
+	{
+		$filename = new ReflectionProperty('CI_Log', '_log_filename');
+		if (PHP_VERSION_ID < 80100)
+		{
+			$filename->setAccessible(TRUE);
+		}
+
+		$this->ci_set_config('log_path', '');
+		$this->ci_set_config('log_threshold', 4);
+		$this->ci_set_config('log_filename', '');
+		$this->ci_set_config('log_file_extension', 'txt');
+		$instance = new CI_Log();
+
+		// Pretend the process started on an earlier day
+		$filename->setValue($instance, 'log-2000-01-01.txt');
+		$instance->write_log('error', 'next day');
+
+		$this->assertEquals('log-'.date('Y-m-d').'.txt', $filename->getValue($instance));
+		$this->assertFileExists($this->ci_vfs_root->url().'application/logs/log-'.date('Y-m-d').'.txt');
+
+		// A custom filename is never touched
+		$this->ci_set_config('log_filename', 'log-2000-01-01.txt');
+		$instance = new CI_Log();
+		$instance->write_log('error', 'custom');
+
+		$this->assertEquals('log-2000-01-01.txt', $filename->getValue($instance));
+	}
+
 	public function test_format_line()
 	{
 		$this->ci_set_config('log_path', '');

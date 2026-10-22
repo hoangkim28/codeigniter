@@ -123,6 +123,9 @@ class CI_DB_pdo_mysql_driver extends CI_DB_pdo_driver {
 	 */
 	public function db_connect($persistent = FALSE)
 	{
+		// PHP 8.4 added Pdo\Mysql::ATTR_*; PHP 8.5 deprecates the PDO::MYSQL_ATTR_* names
+		$attr = class_exists('Pdo\\Mysql') ? 'Pdo\\Mysql::ATTR_' : 'PDO::MYSQL_ATTR_';
+
 		if (isset($this->stricton))
 		{
 			if ($this->stricton)
@@ -143,12 +146,7 @@ class CI_DB_pdo_mysql_driver extends CI_DB_pdo_driver {
 
 			if ( ! empty($sql))
 			{
-				if (class_exists('Pdo\\Mysql'))
-				{
-					$constant = constant('Pdo\\Mysql::ATTR_INIT_COMMAND');
-				} else {
-					$constant = PDO::MYSQL_ATTR_INIT_COMMAND;
-				}
+				$constant = constant($attr.'INIT_COMMAND');
 
 				if (empty($this->options[$constant]))
 				{
@@ -163,45 +161,21 @@ class CI_DB_pdo_mysql_driver extends CI_DB_pdo_driver {
 
 		if ($this->compress === TRUE)
 		{
-			if (class_exists('Pdo\\Mysql'))
-			{
-				$constant = constant('Pdo\\Mysql::ATTR_COMPRESS');
-			} else {
-				$constant = PDO::MYSQL_ATTR_COMPRESS;
-			}
-
-			$this->options[$constant] = TRUE;
+			$this->options[constant($attr.'COMPRESS')] = TRUE;
 		}
 
 		if (is_array($this->encrypt))
 		{
-			if (class_exists('Pdo\\Mysql'))
-			{
-				$sslKey = constant('Pdo\\Mysql::ATTR_SSL_KEY');
-				$sslCert = constant('Pdo\\Mysql::ATTR_SSL_CERT');
-				$sslCA = constant('Pdo\\Mysql::ATTR_SSL_CA');
-				$sslCAPath = constant('Pdo\\Mysql::ATTR_SSL_CAPATH');
-				$sslCipher = constant('Pdo\\Mysql::ATTR_SSL_CIPHER');
-				$verify = constant('Pdo\\Mysql::ATTR_SSL_VERIFY_SERVER_CERT');
-			} else {
-				$sslKey = PDO::MYSQL_ATTR_SSL_KEY;
-				$sslCert = PDO::MYSQL_ATTR_SSL_CERT;
-				$sslCA = PDO::MYSQL_ATTR_SSL_CA;
-				$sslCAPath = PDO::MYSQL_ATTR_SSL_CAPATH;
-				$sslCipher = PDO::MYSQL_ATTR_SSL_CIPHER;
-				$verify = defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT') ? PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT : null;
-			}
-
 			$ssl = array();
-			empty($this->encrypt['ssl_key'])    OR $ssl[$sslKey]    = $this->encrypt['ssl_key'];
-			empty($this->encrypt['ssl_cert'])   OR $ssl[$sslCert]   = $this->encrypt['ssl_cert'];
-			empty($this->encrypt['ssl_ca'])     OR $ssl[$sslCA]     = $this->encrypt['ssl_ca'];
-			empty($this->encrypt['ssl_capath']) OR $ssl[$sslCAPath] = $this->encrypt['ssl_capath'];
-			empty($this->encrypt['ssl_cipher']) OR $ssl[$sslCipher] = $this->encrypt['ssl_cipher'];
+			empty($this->encrypt['ssl_key'])    OR $ssl[constant($attr.'SSL_KEY')]    = $this->encrypt['ssl_key'];
+			empty($this->encrypt['ssl_cert'])   OR $ssl[constant($attr.'SSL_CERT')]   = $this->encrypt['ssl_cert'];
+			empty($this->encrypt['ssl_ca'])     OR $ssl[constant($attr.'SSL_CA')]     = $this->encrypt['ssl_ca'];
+			empty($this->encrypt['ssl_capath']) OR $ssl[constant($attr.'SSL_CAPATH')] = $this->encrypt['ssl_capath'];
+			empty($this->encrypt['ssl_cipher']) OR $ssl[constant($attr.'SSL_CIPHER')] = $this->encrypt['ssl_cipher'];
 
-			if ($verify && isset($this->encrypt['ssl_verify']))
+			if (defined($attr.'SSL_VERIFY_SERVER_CERT') && isset($this->encrypt['ssl_verify']))
 			{
-				$ssl[$verify] = $this->encrypt['ssl_verify'];
+				$ssl[constant($attr.'SSL_VERIFY_SERVER_CERT')] = $this->encrypt['ssl_verify'];
 			}
 
 			// DO NOT use array_merge() here!
