@@ -134,7 +134,14 @@ class CI_Session {
 			unset($_COOKIE[$this->_config['cookie_name']]);
 		}
 
-		session_start();
+		try
+		{
+			session_start();
+		}
+		catch (Error $e)
+		{
+			throw $this->_unmask_handler_error($e);
+		}
 
 		// Is session ID auto-regeneration configured? (ignoring ajax requests)
 		if ((empty($_SERVER['HTTP_X_REQUESTED_WITH']) OR strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest')
@@ -762,7 +769,33 @@ class CI_Session {
 	public function sess_regenerate($destroy = FALSE)
 	{
 		$_SESSION['__ci_last_regenerate'] = time();
-		session_regenerate_id($destroy);
+		try
+		{
+			session_regenerate_id($destroy);
+		}
+		catch (Error $e)
+		{
+			throw $this->_unmask_handler_error($e);
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Unmask save handler errors
+	 *
+	 * With create_sid() defined, PHP reports an exception thrown earlier in the same
+	 * session_start()/session_regenerate_id() call (validateId(), write() ...) as
+	 * "Session id must be a string", keeping the real one as the previous exception.
+	 *
+	 * @param	Error	$e
+	 * @return	Throwable
+	 */
+	protected function _unmask_handler_error($e)
+	{
+		return ($e->getMessage() === 'Session id must be a string' && $e->getPrevious() !== NULL)
+			? $e->getPrevious()
+			: $e;
 	}
 
 	// ------------------------------------------------------------------------

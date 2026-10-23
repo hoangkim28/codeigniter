@@ -416,6 +416,29 @@ return;
 	}
 
 	/**
+	 * Test that a handler exception masked as "Session id must be a string" is unwrapped
+	 */
+	public function test_unmask_handler_error()
+	{
+		if ( ! class_exists('Error'))
+		{
+			return $this->markTestSkipped('PHP 7+ only');
+		}
+
+		class_exists('CI_Session', FALSE) OR require_once SYSTEM_PATH.'libraries/Session/Session.php';
+		$reflection = new ReflectionClass('CI_Session');
+		$session = $reflection->newInstanceWithoutConstructor();
+		$unmask = new ReflectionMethod('CI_Session', '_unmask_handler_error');
+		$unmask->setAccessible(TRUE);
+
+		$real = new RuntimeException('driver down');
+		$this->assertSame($real, $unmask->invoke($session, new Error('Session id must be a string', 0, $real)));
+
+		$other = new Error('Session id must be a string');
+		$this->assertSame($other, $unmask->invoke($session, $other));
+	}
+
+	/**
 	 * Test the sess_destroy() function
 	 */
 	public function test_sess_destroy()
