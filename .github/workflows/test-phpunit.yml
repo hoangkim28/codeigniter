@@ -54,19 +54,23 @@ jobs:
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: ${{ matrix.php }}
-                    tools: composer, pecl
+                    tools: composer, pecl${{ matrix.DB == 'mysql' && ', phpize, php-config' || '' }}
                     extensions: sqlite3, pgsql, mysqli, pdo, pdo_mysql, pdo_pgsql, pdo_sqlite, mbstring
                     ini-values: ${{ env.PHP_INI_VALUES }}
                     coverage: xdebug
 
-            # Temporary: tests (5.6, mysql) fails with "undefined function mysql_connect()"; check whether ext/mysql loads
-            -   name: Diagnose ext/mysql
-                if: startsWith(matrix.php, '5.')
+            # The PHP 5.x builds on ubuntu-22.04 ship without ext/mysql, so build it from the matching php-src release.
+            -   name: Build ext/mysql
+                if: matrix.DB == 'mysql'
                 run: |
-                    php -m | grep -i mysql || true
-                    php --ri mysql || true
-                    php --ini || true
-                    ls -la "$(php -r 'echo ini_get("extension_dir");')" | grep -i mysql || true
+                    curl -fsSL "https://github.com/php/php-src/archive/refs/tags/php-$(php -r 'echo PHP_VERSION;').tar.gz" | tar xz
+                    cd php-src-php-*/ext/mysql
+                    phpize
+                    ./configure --with-mysql=mysqlnd
+                    make -j"$(nproc)"
+                    sudo make install
+                    echo "extension=mysql.so" | sudo tee "$(php --ini | sed -n 's/^Scan for additional .ini files in: *//p')/20-mysql.ini"
+                    php --ri mysql
 
             -   name: Get composer cache directory
                 id: composer-cache
