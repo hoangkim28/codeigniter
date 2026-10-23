@@ -74,7 +74,7 @@ You can install this fork using Composer:
 
 .. code-block:: bash
 
-	composer require hoangkim28/codeigniter:^0.1
+	composer require hoangkim28/codeigniter:^0.2
 
 After installation, you need to point CodeIgniter to the new system directory. In your `index.php` file, update the `$system_path` variable:
 
