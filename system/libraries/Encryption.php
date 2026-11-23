@@ -371,14 +371,11 @@ class CI_Encryption {
 	 */
 	public function encrypt($data, $params = NULL)
 	{
+		$data === NULL && $data = '';
+
 		if (($params = $this->_get_params($params)) === FALSE)
 		{
 			return FALSE;
-		}
-		// NULL stays NULL, so nullable columns round-trip through decrypt()
-		elseif ($data === NULL)
-		{
-			return NULL;
 		}
 
 		isset($params['key']) OR $params['key'] = $this->hkdf($this->_key, 'sha512', NULL, self::strlen($this->_key), 'encryption');
@@ -511,13 +508,11 @@ class CI_Encryption {
 	 */
 	public function decrypt($data, $params = NULL)
 	{
+		$data === NULL && $data = '';
+
 		if (($params = $this->_get_params($params)) === FALSE)
 		{
 			return FALSE;
-		}
-		elseif ($data === NULL)
-		{
-			return NULL;
 		}
 
 		if (isset($params['hmac_digest']))

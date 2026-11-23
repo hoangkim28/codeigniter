@@ -212,10 +212,6 @@ class Encryption_test extends CI_TestCase {
 
 		$this->assertEquals($message, $this->encryption->decrypt($this->encryption->encrypt($message)));
 
-		// NULL round-trips as NULL
-		$this->assertNull($this->encryption->encrypt(NULL));
-		$this->assertNull($this->encryption->decrypt(NULL));
-
 		// Try DES3 in OFB mode, just for the sake of changing stuff
 		$this->encryption->initialize(array('cipher' => 'tripledes', 'mode' => 'ofb', 'key' => substr($key, 0, 8)));
 		$this->assertEquals($message, $this->encryption->decrypt($this->encryption->encrypt($message)));
@@ -281,14 +277,11 @@ class Encryption_test extends CI_TestCase {
 
 		restore_error_handler();
 
-		// This fork keeps NULL as NULL (upstream #85 maps it to '')
 		$this->assertSame(array(), $notices);
-		$this->assertNull($ciphertext);
-		$this->assertNull($plaintext);
-		$this->assertNull($null_plaintext);
-		$this->assertNull($binary_ciphertext);
-		$this->assertNull($binary_plaintext);
-		$this->assertNull($binary_null_plaintext);
+		$this->assertSame('', $plaintext);
+		$this->assertFalse($null_plaintext);
+		$this->assertSame('', $binary_plaintext);
+		$this->assertFalse($binary_null_plaintext);
 	}
 
 	// --------------------------------------------------------------------
