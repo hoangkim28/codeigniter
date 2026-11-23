@@ -429,7 +429,10 @@ return;
 		$reflection = new ReflectionClass('CI_Session');
 		$session = $reflection->newInstanceWithoutConstructor();
 		$unmask = new ReflectionMethod('CI_Session', '_unmask_handler_error');
-		$unmask->setAccessible(TRUE);
+		if (PHP_VERSION_ID < 80100)
+		{
+			$unmask->setAccessible(TRUE);
+		}
 
 		$real = new RuntimeException('driver down');
 		$this->assertSame($real, $unmask->invoke($session, new Error('Session id must be a string', 0, $real)));

@@ -30,7 +30,8 @@ your *system/* directory.
 Step 2: Check your PHP version
 ==============================
 
-This fork supports PHP 5.4 through 8.5+. We recommend running a
+This fork supports PHP 5.4 through 8.6 and PHP 8.7 nightly.
+We recommend running a
 `currently supported <https://www.php.net/supported-versions.php>`_
 PHP version (8.4 or newer).
 
@@ -121,6 +122,15 @@ have to move the socket path from ``$config['socket']`` to
 The ``$config['socket_type']`` option is also removed, although that won't
 affect your application - it will be ignored and the connection type will
 be determined by the format used for ``$config['host']`` instead.
+
+Since 3.2.0, the 'redis' driver's ``get()`` returns cached values with their
+original PHP types. In 3.1.x, scalars were returned as strings: ``FALSE``
+and ``NULL`` became ``''``, and ``123`` became ``'123'``. Update code that
+compares ``get()`` results with strings to use the original value's type.
+
+A cached ``FALSE`` is now indistinguishable from a missing key: both return
+``FALSE``, as with the other cache drivers. If you need to distinguish
+them, cache a different value instead.
 
 Memcache(d)
 -----------
@@ -222,7 +232,7 @@ That shouldn't be a problem, but you may want to clear them.
 Step 13: Remove usage of OCI8 get_cursor() and stored_procedure() methods
 =========================================================================
 
-The OCI8 :doc:`Database <database/index>` driver no longer has these two
+The OCI8 :doc:`Database <../database/index>` driver no longer has these two
 methods that were specific to it and not present in other database drivers.
 The ``$curs_id`` property is also removed.
 
@@ -238,6 +248,13 @@ if you haven't copied the new one over.
 
 The ``$config['log_file_extension']`` option still works as a fallback,
 but ``$config['log_filename']`` takes precedence when set.
+
+Filename settings are captured when the logger is constructed. Default
+date-based filenames rotate daily, even in long-running processes; custom
+filenames remain fixed. The protected ``$_log_filename`` property remains
+available for subclasses. It holds the custom filename, or an empty string
+for automatic naming; ``_get_log_filename()`` returns the resolved filename.
+Assigning a custom filename prevents automatic rotation.
 
 Step 15: Check recursive usage of get_dir_file_info()
 =====================================================
@@ -263,3 +280,62 @@ entries by key needs review.
 .. note:: In 3.2-dev, this function was broken and returned entries holding
 	only a ``relative_path`` key, so there is nothing to migrate if you are
 	coming from there.
+
+Step 16: Replace config/user_agents.php and config/mimes.php
+============================================================
+
+These config files have received some updates. Please copy them to
+*application/config/user_agents.php* and *application/config/mimes.php*.
+
+Step 17: Check form validation rules for array fields
+=====================================================
+
+This only affects form fields that receive arrays. If you don't validate
+array input, you can skip this step.
+
+If you are upgrading from 3.1.x, check validation rules for field names
+without brackets, such as ``tags``. Submitted arrays are now set to
+``NULL`` in ``$_POST`` after a successful ``run()``; 3.1.x kept them in
+``$_POST``. Add ``is_array`` to accept and keep the array, or use ``tags[]``
+to validate each element.
+
+If you are upgrading from 3.2-dev, check rules that include ``is_array``
+for bracketed field names such as ``items[]``. Rules and callbacks now
+receive the whole array; previously only the first element was validated
+and passed to callbacks. See :ref:`using-arrays-as-field-names`.
+
+Step 18: Check full-page caching with a custom cache_path
+=========================================================
+
+If you set ``$config['cache_path']`` without a trailing slash, such as
+``/var/cache/ci``, cached pages are now served. Previously, cache files
+were written but never read. This does not affect configurations where
+``cache_path`` is empty or already ends with a slash.
+
+Before upgrading, check that pages calling ``$this->output->cache()`` do
+not include per-user content, such as account details or CSRF tokens.
+Cached output can be served to other visitors. See
+:doc:`Web Page Caching <../general/caching>`.
+
+Step 19: Check CAPTCHA image handling
+=====================================
+
+The :doc:`CAPTCHA Helper <../helpers/captcha_helper>` function
+:php:func:`create_captcha()` now correctly removes expired images from
+``img_path`` when it runs. It matches filenames consisting of a 10-digit
+timestamp with an optional fractional part (``.`` or ``,`` separator),
+followed by ``.png`` or ``.jpg`` (case-insensitive). Keep ``img_path``
+dedicated to CAPTCHA images: any matching file is deleted after
+``expiration`` seconds (default 7200). Other files are left alone.
+
+If you are upgrading from 3.1.x, check code that assumes JPEG output.
+Since 3.2-dev, ``create_captcha()`` always writes PNG files; 3.1.x used
+JPEG when ``imagejpeg()`` was available. Replace filenames built from
+``$cap['time']`` plus ``.jpg`` with the returned ``$cap['filename']``,
+which contains the exact filename (``$cap['time']`` plus ``.png``).
+
+Omitting both ``img_path`` and ``img_url`` returns the image inline as a
+``data:image/png;base64,...`` URI again, as described in the CAPTCHA helper
+documentation. This mode was added in 3.2-dev in 2017, but a 2020 merge
+accidentally disabled it, causing ``create_captcha()`` to return ``FALSE``
+instead.

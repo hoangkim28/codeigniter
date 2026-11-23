@@ -134,15 +134,18 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 		{
 			log_message('error', 'Session: No Redis save path configured.');
 		}
-		elseif (preg_match('#^unix://([^\?]+)(?<options>\?.+)?$#', $this->_config['save_path'], $matches))
+		elseif (preg_match('#^unix://([^\?]+)(?<options>\?.+)?$#i', $this->_config['save_path'], $matches))
 		{
 			$save_path = array('path' => $matches[1]);
 		}
-		elseif (preg_match('#(?:(?:tcp|tls)://)?([^:?]+)(?:\:(\d+))?(?<options>\?.+)?#', $this->_config['save_path'], $matches))
+		elseif (preg_match('#^(?:(tcp|tls|ssl)://)?([^:?]+)(?:\:(\d+))?(?<options>\?.+)?#i', $this->_config['save_path'], $matches))
 		{
+			$scheme = strtolower($matches[1]);
+
+			// phpredis needs the tls:// or ssl:// scheme in the host to enable encryption; tcp:// is the default
 			$save_path = array(
-				'host'    => $matches[1],
-				'port'    => empty($matches[2]) ? NULL : $matches[2],
+				'host'    => (in_array($scheme, array('tls', 'ssl'), TRUE) ? $scheme.'://' : '').$matches[2],
+				'port'    => empty($matches[3]) ? NULL : $matches[3],
 				'timeout' => 0.0 // We always pass this to Redis::connect(), so it needs to exist
 			);
 		}
@@ -390,6 +393,15 @@ class CI_Session_redis_driver extends CI_Session_driver implements CI_Session_dr
 	 */
 	public function updateTimestamp($id, $unknown)
 	{
+		// Before PHP 8.6, PHP called this only for sessions already in storage.
+		// From 8.6, it also calls this instead of write() for a new session that
+		// is still empty. When no record exists yet, this calls write(), because
+		// only write() creates one.
+		if ($this->_key_exists === FALSE OR $id !== $this->_session_id)
+		{
+			return $this->write($id, $unknown);
+		}
+
 		return $this->_redis->{$this->_setTimeout_name}($this->_key_prefix.$id, $this->_config['expiration']);
 	}
 
