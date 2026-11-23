@@ -64,7 +64,9 @@ jobs:
             -   name: Build ext/mysql
                 if: matrix.DB == 'mysql'
                 run: |
-                    curl -fsSL "https://github.com/php/php-src/archive/refs/tags/php-$(php -r 'echo PHP_VERSION;').tar.gz" | tar xz
+                    # GitHub's archive endpoint sometimes returns a 404; retry into a file so tar never sees a partial stream
+                    curl -fsSL --retry 5 --retry-delay 10 --retry-all-errors -o php-src.tar.gz "https://github.com/php/php-src/archive/refs/tags/php-$(php -r 'echo PHP_VERSION;').tar.gz"
+                    tar xzf php-src.tar.gz
                     cd php-src-php-*/ext/mysql
                     phpize
                     ./configure --with-mysql=mysqlnd
